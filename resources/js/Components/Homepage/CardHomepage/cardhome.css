@@ -1,0 +1,38 @@
+.homeCard {
+  box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2); /* Umbră mai subtilă și modernă */
+  margin: 15px;
+  text-align: center;
+  width: 250px; /* Asigură dimensiuni consistente pentru toate cardurile */
+  transition: transform 0.3s ease-in-out; /* Tranziție suavă pentru hover */
+  border: dotted;
+  border-width: 10px 4px;
+  border-radius: 10px 40px;}
+
+.homeCard:hover {
+  transform: scale(1.05); /* Ușor mai mare la hover pentru efect vizual */
+}
+
+.homeCard-img {
+  height: 250px;
+  width: 250px;
+  display: block;
+  border-width: 10px 4px;
+  border-radius: 10px 40px;}
+
+.middle {
+  transition: .5s ease;
+  opacity: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.homeCard:hover .homeCard-img {
+  opacity: 0.3;
+}
+
+.homeCard:hover .middle {
+  opacity: 1;
+}

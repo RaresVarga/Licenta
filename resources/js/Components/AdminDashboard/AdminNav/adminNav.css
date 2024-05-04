@@ -1,0 +1,23 @@
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: red;
+    padding: 5px;
+}
+
+.navbar-left img {
+    height: 50px; /* Ajustează dimensiunea după preferințe */
+}
+
+.navbar-right a {
+    margin-left: 10px;
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+    margin: 15px;
+}
+
+.navbar-right a:hover {
+    color: #555;
+}

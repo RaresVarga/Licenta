@@ -1,0 +1,54 @@
+.navbar {
+    display: flex;
+    justify-content: space-between; /* Alinează elementele la extremități */
+    align-items: center; /* Centrează elementele vertical */
+    padding: 0 20px; /* Adaugă un padding pentru aspect */
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    transition: background-color 0.3s ease-in-out;
+    z-index: 1000;
+    height: 50px; /* Mărește înălțimea nav-barului */
+}
+
+.navbar .nav-link {
+    text-decoration: none; /* Înlătură sublinierea implicită */
+    color: white; /* Setează culoarea textului */
+    transition: color 0.3s ease-in-out; /* Tranziție pentru efectul de hover */
+    font-size: 18px; /* Potrivită pentru linkuri mai mari */
+    margin-left: 20px; /* Adaugă un spațiu la stânga fiecărui link */
+    margin-right: 20px; /* Adaugă un spațiu la dreapta fiecărui link */
+}
+
+
+.navbar .logo {
+    font-size: 24px; /* Mărește dimensiunea fontului pentru logo, dacă este text */
+    cursor: pointer;
+}
+
+
+.navbar .nav-link:hover {
+    color: #FFD700; /* Schimbă culoarea la hover, poți alege orice culoare dorești */
+    cursor: pointer;
+}
+
+.navbar.transparent {
+    background-color: transparent; /* Menține navbar-ul transparent la început */
+}
+
+.navbar.solid {
+    background-color: white; /* Schimbă la alb sau la culoarea dorită când este solid */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Opțional: adaugă o umbră pentru a evidenția schimbarea */
+}
+
+.navbar.solid .nav-link {
+    color: black; /* Schimbă culoarea linkurilor în negru */
+}
+
+/* Opțional, poți adăuga și un efect de hover diferit pentru starea solid */
+.navbar.solid .nav-link:hover {
+    color: grey; /* Schimbă culoarea la hover în gri, de exemplu */
+}
+
+

@@ -1,0 +1,71 @@
+/* formStyles.css */
+.form-container {
+    max-width: 100%; /* Ocupă întreaga lățime a părintelui, în funcție de padding și margini */
+    min-width: 400px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    font-family: 'Arial', sans-serif;
+  }
+  
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  input[type="text"],
+  input[type="email"],
+  textarea {
+    width: calc(100% - 20px); /* Se scade padding-ul pentru a asigura că inputurile nu depășesc părintele */
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    font-size: 16px;
+    outline: none;
+  }
+  
+  input[type="text"]:focus,
+  input[type="email"]:focus,
+  textarea:focus {
+    border-color: #a0b0e0;
+  }
+  
+
+  
+  input[type="submit"] {
+    cursor: pointer;
+    background: linear-gradient(45deg, #957DAD, #79B0B7);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 18px;
+    border-radius: 30px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s;
+    width: auto; /* Auto va permite butonului să fie doar atât de larg cât textul său + padding */
+  }
+  
+  input[type="submit"]:hover {
+    background: linear-gradient(45deg, #79B0B7, #957DAD);
+  }
+  
+  
+  /* Labels styles */
+  label {
+    color: #333;
+    font-size: 18px;
+    font-weight: bold;
+    padding-left: 20px;
+  }
+
+  .success-message {
+    margin-top: 1rem;
+    color: #28a745; /* o culoare verde pentru succes */
+    font-size: 1rem;
+    text-align: center;
+  }
+  
