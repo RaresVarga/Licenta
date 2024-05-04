@@ -38,7 +38,7 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        //
+        return Inertia::render('UserDetail', ['user' => $user]);
     }
 
     /**
@@ -46,7 +46,8 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        //
+        return Inertia::render('UserEdit', ['user' => $user]);
+
     }
 
     /**
@@ -54,7 +55,15 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        //
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'tip' => 'required|in:user,admin', 
+        ]);
+    
+        $user->update($validatedData);
+    
+        return redirect()->route('users.show', ['user' => $user->id])->with('success', 'Utilizator actualizat cu succes!');
     }
 
     /**
@@ -62,6 +71,7 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        //
+        $user->delete();
+        return redirect()->route('admin.users')->with('success', 'Utilizator șters cu succes!');
     }
 }

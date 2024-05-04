@@ -1,5 +1,6 @@
 import React from 'react';
 import { Head, Link } from '@inertiajs/inertia-react';
+import { Inertia } from '@inertiajs/inertia';
 import '../../css/adminDashUser.css'
 import AdNav from '@/Components/AdminDashboard/AdminNav/AdNav'
 
@@ -10,7 +11,7 @@ export default function Users({ users }) {
 <div className="users-page">
             <div className="title-container">
                 <Head title="Utilizatori" />
-                <h1>Lista Utilizatorilor</h1>
+                <h1 className="users-page-title">Lista utilizatorilor</h1>
             </div>
         <div className="table-container">
             <table>
@@ -27,8 +28,8 @@ export default function Users({ users }) {
                             <td>{user.name}</td>
                             <td>{user.email}</td>
                             <td>
-                                <Link href={`/users/${user.id}`} className="btn btn-info">Vizualizează</Link>
-                                <Link href={`/users/edit/${user.id}`} className="btn btn-primary">Editează</Link>
+                                <Link href={route('users.show', {user: user.id})} className="btn btn-info">Vizualizează</Link>
+                                <Link href={route('users.edit', {user: user.id})} className="btn btn-primary">Editează</Link>
                                 <button onClick={() => handleDelete(user.id)} className="btn btn-danger">Șterge</button>
                             </td>
                         </tr>
@@ -42,8 +43,7 @@ export default function Users({ users }) {
 }
 
 function handleDelete(userId) {
-    if (confirm('Ești sigur că vrei să ștergi acest utilizator?')) {
-        // Logica de ștergere, poate folosi Inertia.visit sau alte metode
-        console.log('Ștergere utilizator', userId);
+    if (window.confirm('Ești sigur că vrei să ștergi acest utilizator?')) {
+        Inertia.delete(route('users.destroy', userId));
     }
 }
