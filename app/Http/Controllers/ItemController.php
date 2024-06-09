@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Item;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class ItemController extends Controller
 {
@@ -12,7 +13,8 @@ class ItemController extends Controller
      */
     public function index()
     {
-        //
+        $items = Item::all();
+        return Inertia::render('Dashboard', ['items' => $items]);
     }
 
     /**
@@ -34,32 +36,38 @@ class ItemController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Item $item)
+    public function show($id)
     {
-        //
+        $item = Item::findOrFail($id);
+        return Inertia::render('Items/Show', ['item' => $item]);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Item $item)
+    public function edit($id)
     {
-        //
+        $item = Item::findOrFail($id);
+        return Inertia::render('Items/Edit', ['item' => $item]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Item $item)
+    public function update(Request $request, $id)
     {
-        //
+        $item = Item::findOrFail($id);
+        $item->update($request->all());
+        return redirect()->route('items.index');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Item $item)
+    public function destroy($id)
     {
-        //
+        $item = Item::findOrFail($id);
+        $item->delete();
+        return redirect()->route('items.index');
     }
 }

@@ -9,6 +9,14 @@ class Bid extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'pret_bid',
+        'ora_bid',
+        'auction_id',
+        'user_id',
+    ];
+
+
     public function user()
     {
         return $this->belongsTo(User::class);

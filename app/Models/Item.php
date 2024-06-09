@@ -8,10 +8,16 @@ use Illuminate\Database\Eloquent\Model;
 class Item extends Model
 {
     use HasFactory;
+    protected $fillable = [
+        'category_id',
+        'name',
+        'descriere',
+        'image', // Adăugăm câmpul pentru imagine
+    ];
 
     public function auction()
     {
-        return $this->belongsTo(Auction::class);
+        return $this->hasOne(Auction::class);
     }
 
     public function category()
