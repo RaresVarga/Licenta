@@ -1,18 +1,24 @@
 import axios from 'axios';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePage } from '@inertiajs/inertia-react';
 import Modal from 'react-modal';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayoutbreeze';
 import Payment from './Payment';
 import '../../../css/cart.css';
 
-Modal.setAppElement('#app'); // Asigură-te că id-ul elementului root este corect
+Modal.setAppElement('#app');
 
 export default function Cart({ auth }) {
     const { cartItems } = usePage().props;
     const [clientSecret, setClientSecret] = useState('');
     const [selectedItem, setSelectedItem] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [purchasedItems, setPurchasedItems] = useState([]);
+
+    useEffect(() => {
+        const purchasedIds = cartItems.filter(item => item.purchased).map(item => item.id);
+        setPurchasedItems(purchasedIds);
+    }, [cartItems]);
 
     const handleBuyNow = async (cartItem) => {
         const amount = cartItem.item.auction && cartItem.item.auction.bids.length > 0 
@@ -28,7 +34,7 @@ export default function Cart({ auth }) {
             const response = await axios.post('/create-payment-intent', { amount });
             setClientSecret(response.data.client_secret);
             setSelectedItem(cartItem);
-            setIsModalOpen(true); // Deschide modalul după ce primești clientSecret
+            setIsModalOpen(true);
         } catch (error) {
             console.error('Error creating payment intent:', error);
         }
@@ -38,6 +44,18 @@ export default function Cart({ auth }) {
         setIsModalOpen(false);
         setClientSecret('');
         setSelectedItem(null);
+    };
+
+    const handlePaymentSuccess = async () => {
+        if (selectedItem) {
+            try {
+                await axios.post('/mark-as-purchased', { cartItemId: selectedItem.id });
+                setPurchasedItems([...purchasedItems, selectedItem.id]);
+                closeModal();
+            } catch (error) {
+                console.error('Error marking item as purchased:', error);
+            }
+        }
     };
 
     return (
@@ -50,6 +68,8 @@ export default function Cart({ auth }) {
                                 ? cartItem.item.auction.bids[cartItem.item.auction.bids.length - 1].pret_bid 
                                 : (cartItem.item.auction ? cartItem.item.auction.pret_start : 0);
 
+                            const isPurchased = purchasedItems.includes(cartItem.id);
+
                             return (
                                 <div key={cartItem.id} className="cart-item bg-white p-4 rounded-md shadow-md flex justify-between items-center">
                                     <img src={`/storage/${cartItem.item.image}`} alt={cartItem.item.name} className="cart-item-image w-16 h-16 object-cover rounded" />
@@ -58,7 +78,11 @@ export default function Cart({ auth }) {
                                         <p className="cart-item-creator text-sm text-gray-600">Vandut de: {cartItem.item.auction && cartItem.item.auction.user ? cartItem.item.auction.user.name : 'N/A'}</p>
                                         <p className="cart-item-price text-sm text-gray-600">Preț: €{price}</p>
                                     </div>
-                                    <button className="cart-item-buy bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700" onClick={() => handleBuyNow(cartItem)}>Cumpără acum</button>
+                                    {isPurchased ? (
+                                        <button className="bg-green-500 text-white py-2 px-4 rounded cursor-not-allowed">Achiziționat</button>
+                                    ) : (
+                                        <button className="cart-item-buy bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700" onClick={() => handleBuyNow(cartItem)}>Cumpără acum</button>
+                                    )}
                                 </div>
                             );
                         })
@@ -76,7 +100,7 @@ export default function Cart({ auth }) {
                     {clientSecret && selectedItem && (
                         <div className="payment-section">
                             <h2>Plătește pentru: {selectedItem.item.name}</h2>
-                            <Payment clientSecret={clientSecret} />
+                            <Payment clientSecret={clientSecret} onPaymentSuccess={handlePaymentSuccess} />
                             <button onClick={closeModal} className="close-button">Închide</button>
                         </div>
                     )}

@@ -9,6 +9,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\AuctionController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\CartController;
 use Stripe\Stripe;
 use Stripe\Customer;
 
@@ -67,26 +68,8 @@ Route::middleware('auth')->group(function () {
 
 Route::post('/create-payment-intent', [PaymentController::class, 'createPaymentIntent']);
 Route::post('/handle-payment', [PaymentController::class, 'handlePayment']);
+Route::post('/mark-as-purchased', [CartController::class, 'markAsPurchased']);
 
-Route::get('/test-stripe', function () {
-    return [
-        'stripe_key' => config('services.stripe.key'),
-        'stripe_secret' => config('services.stripe.secret'),
-    ];
-});
 
-Route::get('/test-stripe-connection', function () {
-    Stripe::setApiKey(config('services.stripe.secret'));
-
-    try {
-        $customer = \Stripe\Customer::create([
-            'description' => 'Test Customer',
-            'email' => 'test@example.com',
-        ]);
-        return ['status' => 'success', 'customer' => $customer];
-    } catch (\Exception $e) {
-        return ['status' => 'failure', 'error' => $e->getMessage()];
-    }
-});
 
 require __DIR__.'/auth.php';

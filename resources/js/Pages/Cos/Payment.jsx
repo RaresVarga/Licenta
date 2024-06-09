@@ -4,7 +4,7 @@ import { Elements, CardElement, useStripe, useElements } from '@stripe/react-str
 
 const stripePromise = loadStripe('pk_test_51PPjCJP8tEZyR05OwrNjmWr05SRjWf3FWYeRKfHJizOLoYaFatghiZjvc2k8WsFoUjkFxgUMsa1Yi8e1v46yLaZt00p3cfgbxZ');
 
-const CheckoutForm = ({ clientSecret }) => {
+const CheckoutForm = ({ clientSecret, onPaymentSuccess }) => {
     const stripe = useStripe();
     const elements = useElements();
     const [error, setError] = useState(null);
@@ -22,6 +22,7 @@ const CheckoutForm = ({ clientSecret }) => {
             setError(error.message);
         } else {
             console.log('Payment successful:', paymentIntent);
+            onPaymentSuccess(); // Notifică părintele că plata a fost realizată cu succes
         }
     };
 
@@ -41,9 +42,9 @@ const CheckoutForm = ({ clientSecret }) => {
     );
 };
 
-const Payment = ({ clientSecret }) => (
+const Payment = ({ clientSecret, onPaymentSuccess }) => (
     <Elements stripe={stripePromise}>
-        <CheckoutForm clientSecret={clientSecret} />
+        <CheckoutForm clientSecret={clientSecret} onPaymentSuccess={onPaymentSuccess} />
     </Elements>
 );
 
