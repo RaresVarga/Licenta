@@ -70,6 +70,8 @@ Route::post('/create-payment-intent', [PaymentController::class, 'createPaymentI
 Route::post('/handle-payment', [PaymentController::class, 'handlePayment']);
 Route::post('/mark-as-purchased', [CartController::class, 'markAsPurchased']);
 
+Route::post('/auctions/{auction}/buy-now', [AuctionController::class, 'buyNow'])->name('auctions.buyNow');
+Route::post('/auctions/{auction}/end', [AuctionController::class, 'endAuction']);
 
 
 require __DIR__.'/auth.php';

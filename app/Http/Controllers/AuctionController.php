@@ -195,6 +195,73 @@ public function cart()
         ]);
     }
 
+    public function buyNow(Request $request, Auction $auction)
+{
+    if ($auction->status !== 'active') {
+        return response()->json(['error' => 'Auction is not active'], 400);
+    }
+
+    $userId = auth()->id();
+
+    if (!$userId) {
+        return response()->json(['error' => 'User not authenticated'], 401);
+    }
+
+    $auction->status = 'ended';
+    $auction->user_id = $userId;
+    $auction->save();
+
+    $exists = CartItem::where('user_id', $userId)
+                      ->where('item_id', $auction->item_id)
+                      ->exists();
+
+    if (!$exists) {
+        CartItem::create([
+            'user_id' => $userId,
+            'item_id' => $auction->item_id,
+            'purchased' => false, // Set to false because it is not purchased yet
+        ]);
+    }
+
+    return response()->json(['success' => true]);
+}
+
+public function endAuction(Request $request, Auction $auction)
+{
+    $user = auth()->user();
+    $latestBid = $auction->bids()->latest()->first();
+
+    if ($request->buy_now) {
+        $amount = $auction->buy_now;
+        $userId = $user->id;
+    } else {
+        if ($latestBid) {
+            $amount = $latestBid->pret_bid;
+            $userId = $latestBid->user_id;
+        } else {
+            return response()->json(['error' => 'No bids found and buy now not used'], 400);
+        }
+    }
+
+    $auction->status = 'ended';
+    $auction->user_id = $userId;
+    $auction->save();
+
+    // Verificăm dacă produsul este deja în coș
+    $exists = CartItem::where('user_id', $userId)
+                      ->where('item_id', $auction->item_id)
+                      ->exists();
+
+    if (!$exists) {
+        CartItem::create([
+            'user_id' => $userId,
+            'item_id' => $auction->item_id,
+        ]);
+    }
+
+    return response()->json(['success' => true]);
+}
+
     public function edit(Auction $auction)
     {
         //

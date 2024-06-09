@@ -9,16 +9,16 @@ use App\Models\CartItem;
 class CartController extends Controller
 {
     public function markAsPurchased(Request $request)
-    {
-        $cartItemId = $request->cartItemId;
-        $cartItem = CartItem::find($cartItemId);
+{
+    $cartItemId = $request->cartItemId;
+    $cartItem = CartItem::find($cartItemId);
 
-        if ($cartItem) {
-            $cartItem->purchased = true;
-            $cartItem->save();
-            return response()->json(['success' => true]);
-        } else {
-            return response()->json(['error' => 'Item not found'], 404);
-        }
+    if ($cartItem) {
+        $cartItem->purchased = true;
+        $cartItem->save();
+        return response()->json(['success' => true]);
+    } else {
+        return response()->json(['error' => 'Item not found'], 404);
     }
+}
 }

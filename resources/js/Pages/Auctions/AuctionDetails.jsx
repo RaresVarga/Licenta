@@ -13,14 +13,14 @@ export default function AuctionDetails({ auth }) {
         initialLatestBid ? parseFloat(initialLatestBid.pret_bid) + 1 : parseFloat(initialAuction.pret_start)
     );
     const [errorMessage, setErrorMessage] = useState(errors.pret_bid || '');
-    const [auctionEnded, setAuctionEnded] = useState(false); // Adăugăm acest state
+    const [auctionEnded, setAuctionEnded] = useState(false);
 
     useEffect(() => {
         const timer = setInterval(() => {
             setTimeLeft((prevTime) => {
-                if (prevTime - 1 <= 0 && !auctionEnded) { // Verificăm dacă licitația s-a încheiat
+                if (prevTime - 1 <= 0 && !auctionEnded) {
                     console.log('Auction ended. Time left: 0');
-                    setAuctionEnded(true); // Setăm auctionEnded la true pentru a preveni mesaje multiple
+                    setAuctionEnded(true);
                     return 0;
                 }
                 return Math.max(0, prevTime - 1);
@@ -57,11 +57,37 @@ export default function AuctionDetails({ auth }) {
                 setAuction(updatedAuction);
                 setLatestBid(newBid);
                 setNextBidAmount(newBid.pret_bid + 1);
-                setTimeLeft(props.timeLeft); // Actualizăm timpul rămas
+                setTimeLeft(props.timeLeft);
                 setErrorMessage('');
             }
         });
     };
+
+    const handleBuyNow = (e) => {
+        e.preventDefault();
+    
+        const confirmBuyNow = window.confirm("Buy now?");
+        if (confirmBuyNow) {
+            const auctionId = auction.id;
+    
+            axios.post(`/auctions/${auctionId}/end`, {
+                buy_now: true,
+            }).then((response) => {
+                if (response.data.success) {
+                    setAuction((prevAuction) => ({
+                        ...prevAuction,
+                        status: 'ended'
+                    }));
+                    // Actualizați și adăugați logica de succes aici, dacă este necesar
+                } else {
+                    console.error('Error ending auction:', response.data.error);
+                }
+            }).catch((error) => {
+                console.error('Error ending auction:', error);
+            });
+        }
+    };
+    
 
     const formatTime = (seconds) => {
         const h = Math.floor(seconds / 3600);
@@ -104,7 +130,7 @@ export default function AuctionDetails({ auth }) {
                             >
                                 Place Bid (€{nextBidAmount})
                             </button>
-                            <button className="auction-buy-now-button">
+                            <button className="auction-buy-now-button" onClick={handleBuyNow}>
                                 Buy Now (€{auction.buy_now})
                             </button>
                         </div>
