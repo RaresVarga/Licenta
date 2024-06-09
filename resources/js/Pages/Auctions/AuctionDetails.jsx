@@ -13,12 +13,14 @@ export default function AuctionDetails({ auth }) {
         initialLatestBid ? parseFloat(initialLatestBid.pret_bid) + 1 : parseFloat(initialAuction.pret_start)
     );
     const [errorMessage, setErrorMessage] = useState(errors.pret_bid || '');
+    const [auctionEnded, setAuctionEnded] = useState(false); // Adăugăm acest state
 
     useEffect(() => {
         const timer = setInterval(() => {
             setTimeLeft((prevTime) => {
-                if (prevTime - 1 <= 0) {
+                if (prevTime - 1 <= 0 && !auctionEnded) { // Verificăm dacă licitația s-a încheiat
                     console.log('Auction ended. Time left: 0');
+                    setAuctionEnded(true); // Setăm auctionEnded la true pentru a preveni mesaje multiple
                     return 0;
                 }
                 return Math.max(0, prevTime - 1);
@@ -26,7 +28,7 @@ export default function AuctionDetails({ auth }) {
         }, 1000);
 
         return () => clearInterval(timer);
-    }, []);
+    }, [auctionEnded]);
 
     useEffect(() => {
         setNextBidAmount(latestBid && latestBid.pret_bid ? parseFloat(latestBid.pret_bid) + 1 : parseFloat(initialAuction.pret_start));

@@ -138,7 +138,7 @@ class AuctionController extends Controller
 public function cart()
 {
     $user = auth()->user();
-    $cartItems = CartItem::with('item')->where('user_id', $user->id)->get();
+    $cartItems = CartItem::with(['item.auction.user', 'item.auction.bids'])->where('user_id', $user->id)->get();
     \Log::info("Fetching cart items for user ID: {$user->id}. Cart items count: " . $cartItems->count());
     return Inertia::render('Cos/Cart', ['cartItems' => $cartItems]);
 }

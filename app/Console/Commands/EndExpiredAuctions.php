@@ -34,15 +34,25 @@ class EndExpiredAuctions extends Command
 
             if ($latestBid) {
                 \Log::info("Latest bid found. User ID: {$latestBid->user_id}, Item ID: {$auction->item_id}");
-                $cartItem = CartItem::create([
-                    'user_id' => $latestBid->user_id,
-                    'item_id' => $auction->item_id,
-                ]);
 
-                if ($cartItem) {
-                    \Log::info("Cart item created successfully. Cart Item ID: {$cartItem->id}");
+                // Verificăm dacă produsul este deja în coș
+                $exists = CartItem::where('user_id', $latestBid->user_id)
+                                  ->where('item_id', $auction->item_id)
+                                  ->exists();
+
+                if (!$exists) {
+                    $cartItem = CartItem::create([
+                        'user_id' => $latestBid->user_id,
+                        'item_id' => $auction->item_id,
+                    ]);
+
+                    if ($cartItem) {
+                        \Log::info("Cart item created successfully. Cart Item ID: {$cartItem->id}");
+                    } else {
+                        \Log::error("Failed to create cart item for user ID: {$latestBid->user_id}, Item ID: {$auction->item_id}");
+                    }
                 } else {
-                    \Log::error("Failed to create cart item for user ID: {$latestBid->user_id}, Item ID: {$auction->item_id}");
+                    \Log::info("Cart item already exists for user ID: {$latestBid->user_id}, Item ID: {$auction->item_id}");
                 }
             } else {
                 \Log::info("No bids found for the auction. No cart item will be created.");
