@@ -31,8 +31,8 @@ class EndExpiredAuctions extends Command
             $latestBid = $auction->bids()->latest()->first();
             $price = $latestBid ? $latestBid->pret_bid : null;
 
-            if ($price) {
-                \Log::info("Latest bid found. User ID: {$latestBid->user_id}, Item ID: {$auction->item_id}");
+            if ($price && $price > 0) {
+                \Log::info("Valid bid found. User ID: {$latestBid->user_id}, Item ID: {$auction->item_id}, Price: {$price}");
 
                 DB::transaction(function () use ($auction, $latestBid, $price) {
                     $cartItem = CartItem::where('item_id', $auction->item_id)
@@ -41,6 +41,7 @@ class EndExpiredAuctions extends Command
                                         ->first();
 
                     if (!$cartItem) {
+                        \Log::info("Creating new cart item. User ID: {$latestBid->user_id}, Item ID: {$auction->item_id}, Price: {$price}");
                         CartItem::create([
                             'user_id' => $latestBid->user_id,
                             'item_id' => $auction->item_id,
@@ -48,7 +49,10 @@ class EndExpiredAuctions extends Command
                         ]);
                         \Log::info("Cart item created successfully.");
                     } else {
-                        \Log::info("Cart item already exists for user ID: {$latestBid->user_id}, Item ID: {$auction->item_id}. No need to create a new one.");
+                        \Log::info("Updating existing cart item. User ID: {$latestBid->user_id}, Item ID: {$auction->item_id}, Price: {$price}");
+                        $cartItem->price = $price;
+                        $cartItem->save();
+                        \Log::info("Existing cart item updated with winning bid price: {$price}");
                     }
 
                     // Marchează licitația ca finalizată pentru a preveni duplicările
@@ -57,7 +61,7 @@ class EndExpiredAuctions extends Command
                     \Log::info("Auction ID: {$auction->id} marked as ended.");
                 });
             } else {
-                \Log::info("No bids found for auction ID: {$auction->id}. No cart item will be created.");
+                \Log::info("No valid bids found or bid price is zero for auction ID: {$auction->id}. No cart item will be created.");
                 $auction->status = 'ended';
                 $auction->save();
                 \Log::info("Auction ID: {$auction->id} marked as ended.");
