@@ -78,7 +78,7 @@ export default function AuctionDetails({ auth }) {
                         ...prevAuction,
                         status: 'ended'
                     }));
-                    // Actualizați și adăugați logica de succes aici, dacă este necesar
+                    console.log("Auction ended with Buy Now successfully");
                 } else {
                     console.error('Error ending auction:', response.data.error);
                 }
@@ -87,6 +87,9 @@ export default function AuctionDetails({ auth }) {
             });
         }
     };
+    
+    
+    
     
 
     const formatTime = (seconds) => {

@@ -10,6 +10,8 @@ use App\Models\Item;
 use App\Models\Bid;
 use App\Models\CartItem;
 use Carbon\Carbon;
+use DB;
+
 
 class AuctionController extends Controller
 {
@@ -99,31 +101,6 @@ class AuctionController extends Controller
 
     \Log::info("Showing auction. Time left: {$timeLeft} seconds. Current time: {$current_time}, Auction end time: {$auction->end_time}");
 
-    if ($timeLeft <= 0 && $auction->status === 'active') {
-        \Log::info("Auction has ended. Processing the end of auction.");
-
-        $auction->status = 'ended';
-        $auction->save();
-
-        if ($latestBid) {
-            \Log::info("Latest bid found. User ID: {$latestBid->user_id}, Item ID: {$auction->item_id}");
-            $cartItem = CartItem::create([
-                'user_id' => $latestBid->user_id,
-                'item_id' => $auction->item_id,
-            ]);
-
-            if ($cartItem) {
-                \Log::info("Cart item created successfully. Cart Item ID: {$cartItem->id}");
-            } else {
-                \Log::error("Failed to create cart item for user ID: {$latestBid->user_id}, Item ID: {$auction->item_id}");
-            }
-        } else {
-            \Log::info("No bids found for the auction. No cart item will be created.");
-        }
-    } else {
-        \Log::info("Auction still active or already ended. Auction status: {$auction->status}, Time left: {$timeLeft}");
-    }
-
     return Inertia::render('Auctions/AuctionDetails', [
         'auction' => $auction,
         'latestBid' => $latestBid,
@@ -135,11 +112,22 @@ class AuctionController extends Controller
 
 
 
+
+
+
+
+
+
 public function cart()
 {
     $user = auth()->user();
     $cartItems = CartItem::with(['item.auction.user', 'item.auction.bids'])->where('user_id', $user->id)->get();
     \Log::info("Fetching cart items for user ID: {$user->id}. Cart items count: " . $cartItems->count());
+
+    foreach ($cartItems as $cartItem) {
+        \Log::info("Cart Item ID: {$cartItem->id}, Item ID: {$cartItem->item_id}, Price: {$cartItem->price}");
+    }
+
     return Inertia::render('Cos/Cart', ['cartItems' => $cartItems]);
 }
 
@@ -195,72 +183,147 @@ public function cart()
         ]);
     }
 
+    // AuctionController.php
     public function buyNow(Request $request, Auction $auction)
-{
-    if ($auction->status !== 'active') {
-        return response()->json(['error' => 'Auction is not active'], 400);
+    {
+        if ($auction->status !== 'active') {
+            return response()->json(['error' => 'Auction is not active'], 400);
+        }
+
+        $user = auth()->user();
+
+        if (!$user) {
+            \Log::error("User not authenticated when attempting to buy now.");
+            return response()->json(['error' => 'User not authenticated'], 401);
+        }
+
+        \Log::info("Buy Now action initiated. Price: {$auction->buy_now}, User ID: {$user->id}");
+
+        if (is_null($auction->buy_now)) {
+            \Log::error("Buy Now price is null.");
+            return response()->json(['error' => 'Buy Now price is null'], 400);
+        }
+
+        DB::transaction(function() use ($auction, $user) {
+            $auction->status = 'ended';
+            $auction->user_id = $user->id;
+            $auction->save();
+
+            $cartItem = CartItem::where('user_id', $user->id)
+                                ->where('item_id', $auction->item_id)
+                                ->lockForUpdate()
+                                ->first();
+
+            if (!$cartItem) {
+                $cartItem = CartItem::create([
+                    'user_id' => $user->id,
+                    'item_id' => $auction->item_id,
+                    'price' => $auction->buy_now,
+                ]);
+                \Log::info("Cart item created with Buy Now price: {$cartItem->price}");
+            } else {
+                $cartItem->price = $auction->buy_now;
+                $cartItem->save();
+                \Log::info("Cart item updated with Buy Now price: {$cartItem->price}");
+            }
+        });
+
+        return response()->json(['success' => true]);
     }
 
-    $userId = auth()->id();
 
-    if (!$userId) {
+
+    public function endAuction(Request $request, Auction $auction)
+{
+    $user = auth()->user();
+
+    if (!$user) {
+        \Log::error("User not authenticated when attempting to end auction.");
         return response()->json(['error' => 'User not authenticated'], 401);
     }
 
-    $auction->status = 'ended';
-    $auction->user_id = $userId;
-    $auction->save();
-
-    $exists = CartItem::where('user_id', $userId)
-                      ->where('item_id', $auction->item_id)
-                      ->exists();
-
-    if (!$exists) {
-        CartItem::create([
-            'user_id' => $userId,
-            'item_id' => $auction->item_id,
-            'purchased' => false, // Set to false because it is not purchased yet
-        ]);
+    if ($auction->status !== 'active') {
+        \Log::info("Auction already ended. Auction ID: {$auction->id}");
+        return response()->json(['error' => 'Auction already ended'], 400);
     }
 
-    return response()->json(['success' => true]);
-}
+    \Log::info("Ending auction. User ID: {$user->id}");
 
-public function endAuction(Request $request, Auction $auction)
-{
-    $user = auth()->user();
     $latestBid = $auction->bids()->latest()->first();
+    $price = null;
+    $userId = null;
 
     if ($request->buy_now) {
-        $amount = $auction->buy_now;
+        $price = $auction->buy_now;
         $userId = $user->id;
     } else {
         if ($latestBid) {
-            $amount = $latestBid->pret_bid;
+            $price = $latestBid->pret_bid;
             $userId = $latestBid->user_id;
         } else {
+            \Log::error("No bids found and buy now not used. Auction ID: {$auction->id}");
             return response()->json(['error' => 'No bids found and buy now not used'], 400);
         }
     }
 
-    $auction->status = 'ended';
-    $auction->user_id = $userId;
-    $auction->save();
+    \Log::info("Auction ending. Auction ID: {$auction->id}, User ID: {$userId}, Price: {$price}");
 
-    // Verificăm dacă produsul este deja în coș
-    $exists = CartItem::where('user_id', $userId)
-                      ->where('item_id', $auction->item_id)
-                      ->exists();
-
-    if (!$exists) {
-        CartItem::create([
-            'user_id' => $userId,
-            'item_id' => $auction->item_id,
-        ]);
+    if (!isset($userId)) {
+        \Log::error("User ID is null. Auction ID: {$auction->id}");
+        return response()->json(['error' => 'User ID is null'], 400);
     }
+
+    DB::transaction(function() use ($auction, $userId, $price) {
+        $auction->status = 'ended';
+        $auction->user_id = $userId;
+        $auction->save();
+
+        $cartItem = CartItem::where('item_id', $auction->item_id)
+                            ->where('user_id', $userId)
+                            ->lockForUpdate()
+                            ->first();
+
+        if (!$cartItem) {
+            CartItem::create([
+                'user_id' => $userId,
+                'item_id' => $auction->item_id,
+                'price' => $price,
+            ]);
+            \Log::info("Cart item created with price: {$price}, Item ID: {$auction->item_id}, User ID: {$userId}");
+        } else {
+            \Log::info("Cart item already exists for user ID: {$userId}, Item ID: {$auction->item_id}. No need to create a new one.");
+        }
+    });
 
     return response()->json(['success' => true]);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     public function edit(Auction $auction)
     {

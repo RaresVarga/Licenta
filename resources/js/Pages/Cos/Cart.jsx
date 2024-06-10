@@ -21,15 +21,13 @@ export default function Cart({ auth }) {
     }, [cartItems]);
 
     const handleBuyNow = async (cartItem) => {
-        const amount = cartItem.item.auction && cartItem.item.auction.bids.length > 0 
-            ? cartItem.item.auction.bids[cartItem.item.auction.bids.length - 1].pret_bid 
-            : (cartItem.item.auction ? cartItem.item.auction.pret_start : 0);
-
+        const amount = cartItem.price; // Folosim prețul stocat în `cartItem`
+    
         if (amount < 0.5) {
             console.error('The amount must be at least 0.50 EUR');
             return;
         }
-
+    
         try {
             const response = await axios.post('/create-payment-intent', { amount });
             setClientSecret(response.data.client_secret);
@@ -64,9 +62,7 @@ export default function Cart({ auth }) {
                 <div className="cart-items grid grid-cols-1 gap-4">
                     {cartItems.length > 0 ? (
                         cartItems.map(cartItem => {
-                            const price = cartItem.item.auction && cartItem.item.auction.bids.length > 0 
-                                ? cartItem.item.auction.bids[cartItem.item.auction.bids.length - 1].pret_bid 
-                                : (cartItem.item.auction ? cartItem.item.auction.pret_start : 0);
+                            const price = cartItem.price;
 
                             const isPurchased = purchasedItems.includes(cartItem.id);
 
