@@ -26,10 +26,10 @@ export default function Authenticated({ user, header, children }) {
                                     Licitatii
                                 </NavLink>
                                 <NavLink href={route('auctions.create')} active={route().current('auctions.create')}>
-                                    New Auction
+                                    Creeaza licitatie
                                 </NavLink>
                                 <NavLink href={route('auctions.my')} active={route().current('auctions.my')}>
-                                    My Auctions
+                                    Licitatiile mele
                                 </NavLink>
                                 <NavLink href={route('cart')} active={route().current('cart')}>
                                     Castigate

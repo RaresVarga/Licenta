@@ -5,8 +5,13 @@ import { useEffect, useState } from 'react';
 import '../../css/dashboard.css';
 
 export default function Dashboard({ auth }) {
-    const { auctions: initialAuctions = [] } = usePage().props;
-    const [auctions, setAuctions] = useState(initialAuctions);
+    const { auctions: initialAuctions = [], categories: initialCategories = [] } = usePage().props;
+    const [auctions, setAuctions] = useState(initialAuctions.filter(auction => auction.status === 'active'));
+    const [searchTerm, setSearchTerm] = useState('');
+    const [sortCriteria, setSortCriteria] = useState('');
+    const [sortOrder, setSortOrder] = useState('asc');
+    const [selectedCategory, setSelectedCategory] = useState('');
+    const [categories, setCategories] = useState(initialCategories);
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -32,18 +37,88 @@ export default function Dashboard({ auth }) {
         return `${h}h ${m}m ${s}s`;
     };
 
+    const handleSearch = (event) => {
+        setSearchTerm(event.target.value);
+    };
+
+    const handleSort = (criteria) => {
+        let order = sortOrder;
+        if (sortCriteria === criteria) {
+            order = sortOrder === 'asc' ? 'desc' : 'asc';
+        } else {
+            order = 'asc';
+        }
+        setSortCriteria(criteria);
+        setSortOrder(order);
+        setAuctions(prevAuctions => {
+            return [...prevAuctions].sort((a, b) => {
+                if (criteria === 'name') {
+                    return order === 'asc'
+                        ? a.item.name.localeCompare(b.item.name)
+                        : b.item.name.localeCompare(a.item.name);
+                } else if (criteria === 'pret_start') {
+                    return order === 'asc'
+                        ? a.pret_start - b.pret_start
+                        : b.pret_start - a.pret_start;
+                } else if (criteria === 'pret_start_desc') {
+                    return order === 'asc'
+                        ? b.pret_start - a.pret_start
+                        : a.pret_start - b.pret_start;
+                } else if (criteria === 'buy_now') {
+                    return order === 'asc'
+                        ? a.buy_now - b.buy_now
+                        : b.buy_now - a.buy_now;
+                } else {
+                    return 0;
+                }
+            });
+        });
+    };
+
+    const handleCategoryChange = (event) => {
+        setSelectedCategory(event.target.value);
+    };
+
+    const filteredAuctions = auctions.filter(auction => {
+        return auction.item.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+            (selectedCategory === '' || auction.item.category_id === parseInt(selectedCategory));
+    });
+
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={<h2 className="dashboard-header">Dashboard</h2>}
+            header={<h2 className="dashboard-header">Licitatii disponibile</h2>}
         >
             <Head title="Dashboard" />
             <div className="dashboard-container">
                 <div className="dashboard-inner-container">
                     <div className="dashboard-box">
+                        <div className="search-sort-bar">
+                            <div className="sort-dropdown">
+                                <select onChange={(e) => handleSort(e.target.value)} className="sort-select">
+                                    <option value="">Sorteaza</option>
+                                    <option value="name">Alfabetic</option>
+                                    <option value="pret_start">Pret crescator</option>
+                                    <option value="pret_start_desc">Pret descrescator</option>
+                                </select>
+                                <select onChange={handleCategoryChange} className="sort-select">
+                                    <option value="">Toate categoriile</option>
+                                    {categories.map(category => (
+                                        <option key={category.id} value={category.id}>{category.denumire}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <input
+                                type="text"
+                                placeholder="Cauta produse..."
+                                value={searchTerm}
+                                onChange={handleSearch}
+                                className="search-input"
+                            />
+                        </div>
                         <div className="auctions-grid">
-                            {auctions.length > 0 ? (
-                                auctions.map((auction) => (
+                            {filteredAuctions.length > 0 ? (
+                                filteredAuctions.map((auction) => (
                                     <div key={auction.id} className="auction-card">
                                         {auction.item && (
                                             <>
@@ -52,9 +127,9 @@ export default function Dashboard({ auth }) {
                                                 </div>
                                                 <div className="auction-details">
                                                     <h3>{auction.item.name}</h3>
-                                                    <p>Current bid: €{auction.bids && auction.bids.length > 0 ? auction.bids[auction.bids.length - 1].pret_bid : auction.pret_start}</p>
-                                                    <p>Buy Now: €{auction.buy_now}</p>
-                                                    <p>Time left: {formatTime(auction.timeLeft)}</p>
+                                                    <p>Pret start: €{auction.pret_start}</p>
+                                                    <p>Cumpara acum: €{auction.buy_now}</p>
+                                                    <p>Timp ramas: {formatTime(auction.timeLeft)}</p>
                                                     <button onClick={() => handleView(auction.id)} className="btn btn-primary">View now</button>
                                                 </div>
                                             </>
@@ -62,7 +137,7 @@ export default function Dashboard({ auth }) {
                                     </div>
                                 ))
                             ) : (
-                                <p>No auctions available.</p>
+                                <p>Nu exista licitatii disponibile.</p>
                             )}
                         </div>
                     </div>

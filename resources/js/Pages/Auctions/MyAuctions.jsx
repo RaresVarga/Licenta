@@ -13,7 +13,7 @@ export default function MyAuctions({ auth }) {
             setAuctions((prevAuctions) => 
                 prevAuctions.map((auction) => ({
                     ...auction,
-                    timeLeft: Math.max(0, auction.timeLeft - 1)
+                    timeLeft: auction.status === 'active' ? Math.max(0, auction.timeLeft - 1) : auction.timeLeft
                 }))
             );
         }, 1000);
@@ -25,6 +25,16 @@ export default function MyAuctions({ auth }) {
         Inertia.visit(route('auctions.show', auctionId));
     };
 
+    const handleDelete = (auctionId) => {
+        if (confirm('Ești sigur că vrei să ștergi această licitație?')) {
+            Inertia.delete(route('auctions.destroy', { auction: auctionId }), {
+                onSuccess: () => {
+                    setAuctions(auctions.filter(auction => auction.id !== auctionId));
+                }
+            });
+        }
+    };
+
     const formatTime = (seconds) => {
         const h = Math.floor(seconds / 3600);
         const m = Math.floor((seconds % 3600) / 60);
@@ -32,10 +42,14 @@ export default function MyAuctions({ auth }) {
         return `${h}h ${m}m ${s}s`;
     };
 
+    const getFinalPrice = (auction) => {
+        return auction.final_price ?? auction.pret_start;
+    };
+
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={<h2 className="dashboard-header">My Auctions</h2>}
+            header={<h2 className="dashboard-header">Licitatiile mele</h2>}
         >
             <Head title="My Auctions" />
             <div className="dashboard-container">
@@ -52,17 +66,32 @@ export default function MyAuctions({ auth }) {
                                                 </div>
                                                 <div className="auction-details">
                                                     <h3>{auction.item.name}</h3>
-                                                    <p>Current bid: €{auction.bids && auction.bids.length > 0 ? auction.bids[auction.bids.length - 1].pret_bid : auction.pret_start}</p>
-                                                    <p>Buy Now: €{auction.buy_now}</p>
-                                                    <p>Time left: {formatTime(auction.timeLeft)}</p>
-                                                    <button onClick={() => handleView(auction.id)} className="btn btn-primary">View now</button>
+                                                    {auction.status === 'active' ? (
+                                                        <>
+                                                            <p>Pret start: {auction.pret_start}</p>
+                                                            <p>Cumpara acum: {auction.buy_now}</p>
+                                                            <p>Timp ramas: {formatTime(auction.timeLeft)}</p>
+                                                            <div className="button-container">
+                                                                <button onClick={() => handleView(auction.id)} className="btn btn-primary">View now</button>
+                                                                <button onClick={() => handleDelete(auction.id)} className="btn btn-danger">Delete</button>
+                                                            </div>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <p>Pret final: {getFinalPrice(auction)}</p>
+                                                            <p>Status: Incheiat</p>
+                                                            <div className="button-container">
+                                                                <button onClick={() => handleDelete(auction.id)} className="btn btn-danger">Delete</button>
+                                                            </div>
+                                                        </>
+                                                    )}
                                                 </div>
                                             </>
                                         )}
                                     </div>
                                 ))
                             ) : (
-                                <p>No auctions available.</p>
+                                <p>Nu exista licitatii disponibile.</p>
                             )}
                         </div>
                     </div>

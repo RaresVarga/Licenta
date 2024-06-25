@@ -79,6 +79,8 @@ export default function AuctionDetails({ auth }) {
                         status: 'ended'
                     }));
                     console.log("Auction ended with Buy Now successfully");
+                    Inertia.visit('/dashboard'); // Redirecționare către pagina de licitații
+
                 } else {
                     console.error('Error ending auction:', response.data.error);
                 }

@@ -33,7 +33,7 @@ export default function CreateAuction({ auth, categories }) {
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Create New Auction</h2>}
+            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Creaza licitatie</h2>}
         >
             <div className="py-12">
                 <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -41,21 +41,21 @@ export default function CreateAuction({ auth, categories }) {
                         <div className="p-6 bg-white border-b border-gray-200">
                             <form onSubmit={handleSubmit}>
                                 <div>
-                                    <label htmlFor="duration">Duration</label>
+                                    <label htmlFor="duration">Durata</label>
                                     <select
                                         id="duration"
                                         value={data.duration}
                                         onChange={e => setData('duration', e.target.value)}
                                     >
-                                        <option value="2">2 minutes</option> {/* Adăugat 2 minute aici */}
-                                        <option value="6">6 hours</option>
-                                        <option value="12">12 hours</option>
-                                        <option value="24">24 hours</option>
+                                        <option value="2">2 minute</option> {/* Adăugat 2 minute aici */}
+                                        <option value="6">6 ore</option>
+                                        <option value="12">12 ore</option>
+                                        <option value="24">24 ore</option>
                                     </select>
                                     {errors.duration && <div>{errors.duration}</div>}
                                 </div>
                                 <div>
-                                    <label htmlFor="pret_start">Starting Price</label>
+                                    <label htmlFor="pret_start">Pret start</label>
                                     <input
                                         id="pret_start"
                                         type="number"
@@ -65,7 +65,7 @@ export default function CreateAuction({ auth, categories }) {
                                     {errors.pret_start && <div>{errors.pret_start}</div>}
                                 </div>
                                 <div>
-                                    <label htmlFor="buy_now">Buy Now Price</label>
+                                    <label htmlFor="buy_now">Pret cumpara acum</label>
                                     <input
                                         id="buy_now"
                                         type="number"
@@ -75,7 +75,7 @@ export default function CreateAuction({ auth, categories }) {
                                     {errors.buy_now && <div>{errors.buy_now}</div>}
                                 </div>
                                 <div>
-                                    <label htmlFor="item_name">Item Name</label>
+                                    <label htmlFor="item_name">Denumire produs</label>
                                     <input
                                         id="item_name"
                                         type="text"
@@ -85,7 +85,7 @@ export default function CreateAuction({ auth, categories }) {
                                     {errors.item_name && <div>{errors.item_name}</div>}
                                 </div>
                                 <div>
-                                    <label htmlFor="item_description">Item Description</label>
+                                    <label htmlFor="item_description">Descriere produs</label>
                                     <textarea
                                         id="item_description"
                                         value={data.item_description}
@@ -95,23 +95,23 @@ export default function CreateAuction({ auth, categories }) {
                                     {errors.item_description && <div>{errors.item_description}</div>}
                                 </div>
                                 <div>
-                                    <label htmlFor="item_category_id">Item Category</label>
+                                    <label htmlFor="item_category_id">Categorie produs</label>
                                     <select
                                         id="item_category_id"
                                         value={data.item_category_id}
                                         onChange={e => setData('item_category_id', e.target.value)}
                                     >
-                                        <option value="">Select category</option>
+                                        <option value="">Selecteaza categoria</option>
                                         {categories && categories.map((category) => (
                                             <option key={category.id} value={category.id}>
-                                                {category.name}
+                                                {category.denumire}
                                             </option>
                                         ))}
                                     </select>
                                     {errors.item_category_id && <div>{errors.item_category_id}</div>}
                                 </div>
                                 <div>
-                                    <label htmlFor="item_image">Item Image</label>
+                                    <label htmlFor="item_image">Imagine produs</label>
                                     <input
                                         id="item_image"
                                         type="file"
@@ -120,7 +120,7 @@ export default function CreateAuction({ auth, categories }) {
                                     {errors.item_image && <div>{errors.item_image}</div>}
                                 </div>
                                 <div>
-                                    <button type="submit" className="btn btn-primary">Create Auction</button>
+                                    <button type="submit" className="btn btn-primary">Creaza</button>
                                 </div>
                             </form>
                         </div>

@@ -73,6 +73,10 @@ Route::post('/mark-as-purchased', [CartController::class, 'markAsPurchased']);
 Route::middleware('auth')->group(function () {
     Route::post('/auctions/{auction}/buy-now', [AuctionController::class, 'buyNow'])->name('auctions.buyNow');
     Route::post('/auctions/{auction}/end', [AuctionController::class, 'endAuction']);
+    
 });
+
+Route::delete('/auctions/{auction}', [AuctionController::class, 'destroy'])->name('auctions.destroy');
+
 
 require __DIR__.'/auth.php';

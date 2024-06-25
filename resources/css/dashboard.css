@@ -1,9 +1,8 @@
-/* dashboard.css */
 .dashboard-header {
-    font-weight: 600; /* echivalentul font-semibold */
-    font-size: 1.25rem; /* echivalentul text-xl */
-    color: #1f2937; /* text-gray-800 */
-    line-height: 1.5; /* leading-tight */
+    font-weight: 600;
+    font-size: 1.25rem;
+    color: #1f2937;
+    line-height: 1.5;
 }
 
 .dashboard-container {
@@ -34,7 +33,7 @@
     overflow: hidden;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: transform 0.2s;
-    height: 350px; /* Reduce the height */
+    height: 350px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -48,7 +47,7 @@
     width: 100%;
     height: 150px;
     overflow: hidden;
-    flex-shrink: 0; /* Prevent shrinking */
+    flex-shrink: 0;
 }
 
 .auction-image {
@@ -63,7 +62,14 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    flex-grow: 1; /* Allow details to grow */
+    flex-grow: 1;
+}
+
+.button-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 1rem;
 }
 
 .btn {
@@ -74,9 +80,43 @@
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.2s;
-    margin-top: 1rem;
 }
 
 .btn:hover {
+    background-color: #0056b3;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+}
+
+.search-sort-bar {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.search-input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 200px;
+}
+
+.sort-button {
+    padding: 10px 20px;
+    margin-left: 10px;
+    border: none;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+}
+
+.sort-button:hover {
     background-color: #0056b3;
 }

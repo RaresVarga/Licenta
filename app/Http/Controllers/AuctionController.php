@@ -17,6 +17,7 @@ class AuctionController extends Controller
     public function index()
     {
         $auctions = Auction::with('item', 'user')->get();
+        $categories = Category::all();
         $current_time = Carbon::now();
 
         $auctions = $auctions->map(function ($auction) use ($current_time) {
@@ -24,8 +25,12 @@ class AuctionController extends Controller
             return $auction;
         });
 
-        return Inertia::render('Dashboard', ['auctions' => $auctions]);
+        return Inertia::render('Dashboard', [
+            'auctions' => $auctions,
+            'categories' => $categories
+        ]);
     }
+
 
     public function create()
     {
@@ -81,18 +86,27 @@ class AuctionController extends Controller
     }
 
     public function myAuctions()
-    {
-        $user = auth()->user();
-        $auctions = Auction::with('item')->where('user_id', $user->id)->get();
-        $current_time = Carbon::now();
+{
+    $user = auth()->user();
+    $auctions = Auction::with(['item', 'bids' => function ($query) {
+        $query->orderBy('ora_bid', 'desc');
+    }])->where('user_id', $user->id)->get();
+    $current_time = Carbon::now();
 
-        $auctions = $auctions->map(function ($auction) use ($current_time) {
-            $auction->timeLeft = Carbon::parse($auction->end_time)->diffInSeconds($current_time);
-            return $auction;
-        });
+    $auctions = $auctions->map(function ($auction) use ($current_time) {
+        $auction->timeLeft = Carbon::parse($auction->end_time)->diffInSeconds($current_time);
+        if ($auction->status === 'ended') {
+            $auction->final_price = $auction->bids->isNotEmpty() ? $auction->bids->first()->pret_bid : ($auction->buy_now ?? $auction->pret_start);
+            if ($auction->buy_now && $auction->user_id == auth()->id()) {
+                $auction->final_price = $auction->buy_now;
+            }
+        }
+        return $auction;
+    });
 
-        return Inertia::render('Auctions/MyAuctions', ['auctions' => $auctions]);
-    }
+    return Inertia::render('Auctions/MyAuctions', ['auctions' => $auctions]);
+}
+
 
     public function show(Auction $auction)
     {
@@ -211,6 +225,7 @@ class AuctionController extends Controller
         DB::transaction(function() use ($auction, $user) {
             $auction->status = 'ended';
             $auction->user_id = $user->id;
+            $auction->final_price = $auction->buy_now; // Adăugăm final_price aici
             $auction->save();
 
             $cartItem = CartItem::where('user_id', $user->id)
@@ -318,6 +333,10 @@ class AuctionController extends Controller
 
     public function destroy(Auction $auction)
     {
-        //
+        $this->authorize('delete', $auction);
+
+        $auction->delete();
+
+        return redirect()->route('auctions.index')->with('success', 'Licitația a fost ștearsă cu succes.');
     }
 }
