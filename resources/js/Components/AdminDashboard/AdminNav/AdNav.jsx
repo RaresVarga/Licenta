@@ -16,6 +16,7 @@ export default function AdminDashboard() {
                 <Link href="/admin/users">Utilizatori</Link>
                 <Link href="/admin/auctions">Licitații</Link>
                 <Link href="/admin/categories">Categorii</Link>
+                <Link href="/dashboard">Participă la licitații</Link>
                 <Link method="post" href="/logout">Log out</Link>
             </div>
         </nav>

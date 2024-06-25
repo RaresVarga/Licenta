@@ -56,6 +56,22 @@ th {
     color: white;
 }
 
+.btn-success {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    margin: 10px 0;
+    display: inline-block;
+    text-align: center;
+    cursor: pointer;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+}
 
 
 

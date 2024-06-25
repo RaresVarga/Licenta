@@ -10,6 +10,7 @@ use App\Http\Controllers\ItemController;
 use App\Http\Controllers\AuctionController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\AuctionCRUDController;
 use Stripe\Stripe;
 use Stripe\Customer;
 
@@ -41,9 +42,18 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/categories', [CategoryController::class, 'index'])->name('admin.categories');
     Route::get('/admin/categories/create', [CategoryController::class, 'create'])->name('admin.categories.create');
     Route::post('/admin/categories', [CategoryController::class, 'store'])->name('admin.categories.store');
+    Route::get('/admin/categories/{category}', [CategoryController::class, 'show'])->name('admin.categories.show');
     Route::get('/admin/categories/{category}/edit', [CategoryController::class, 'edit'])->name('admin.categories.edit');
     Route::put('/admin/categories/{category}', [CategoryController::class, 'update'])->name('admin.categories.update');
     Route::delete('/admin/categories/{category}', [CategoryController::class, 'destroy'])->name('admin.categories.destroy');
+
+    Route::get('/admin/auctions', [AuctionCRUDController::class, 'index'])->name('admin.auctions.index');
+    Route::get('/admin/auctions/create', [AuctionCRUDController::class, 'create'])->name('admin.auctions.create');
+    Route::post('/admin/auctions', [AuctionCRUDController::class, 'store'])->name('admin.auctions.store');
+    Route::get('/admin/auctions/{auction}', [AuctionCRUDController::class, 'show'])->name('admin.auctions.show');
+    Route::get('/admin/auctions/{auction}/edit', [AuctionCRUDController::class, 'edit'])->name('admin.auctions.edit');
+    Route::put('/admin/auctions/{auction}', [AuctionCRUDController::class, 'update'])->name('admin.auctions.update');
+    Route::delete('/admin/auctions/{auction}', [AuctionCRUDController::class, 'destroy'])->name('admin.auctions.destroy');
 });
 
 Route::get('/dashboard', [AuctionController::class, 'index'])->name('dashboard');

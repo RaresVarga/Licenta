@@ -22,7 +22,7 @@ class CategoryController extends Controller
      */
     public function create()
     {
-        return Inertia::render('Admin/Categories/Create');
+        return Inertia::render('CategoryCreate');
     }
 
     /**
@@ -31,12 +31,13 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'denumire' => 'required|max:255',
+            'descriere' => 'required',
         ]);
-
+    
+        // Folosirea asignării în masă
         Category::create($request->all());
-
-        return redirect()->route('admin.categories');
+        return redirect()->route('admin.categories')->with('success', 'Category created successfully.');
     }
 
     /**
@@ -44,7 +45,7 @@ class CategoryController extends Controller
      */
     public function edit(Category $category)
     {
-        return Inertia::render('Admin/Categories/Edit', ['category' => $category]);
+        return Inertia::render('CategoryEdit', ['category' => $category]);
     }
 
     /**
@@ -53,12 +54,12 @@ class CategoryController extends Controller
     public function update(Request $request, Category $category)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'denumire' => 'required|max:255',
+            'descriere' => 'required',
         ]);
-
+    
         $category->update($request->all());
-
-        return redirect()->route('admin.categories');
+        return redirect()->route('admin.categories')->with('success', 'Category updated successfully.');
     }
 
     /**
@@ -67,7 +68,11 @@ class CategoryController extends Controller
     public function destroy(Category $category)
     {
         $category->delete();
+        return redirect()->route('admin.categories')->with('success', 'Category deleted successfully.');
+    }
 
-        return redirect()->route('admin.categories');
+    public function show(Category $category)
+    {
+        return Inertia::render('CategoryDetail', ['category' => $category]);
     }
 }

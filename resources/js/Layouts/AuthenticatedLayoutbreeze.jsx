@@ -34,6 +34,11 @@ export default function Authenticated({ user, header, children }) {
                                 <NavLink href={route('cart')} active={route().current('cart')}>
                                     Castigate
                                 </NavLink>  
+                                {user.tip === 'admin' && (
+                                    <NavLink href={route('admin.dashboard')} active={route().current('admin.dashboard')}>
+                                        Dashboard admin
+                                    </NavLink>
+                                )}
                             </div>
                             
                         </div>

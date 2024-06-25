@@ -9,6 +9,9 @@ class Category extends Model
 {
     use HasFactory;
 
+    protected $fillable = ['denumire', 'descriere'];
+
+
     public function items()
     {
         return $this->hasMany(Item::class);

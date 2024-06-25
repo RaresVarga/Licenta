@@ -9,7 +9,7 @@ export default function AdminDashboard() {
             <AdNav />
             <div>
                 {/* Content-ul specific paginii de admin poate fi adăugat aici */}
-                <h1>Welcome to the Admin Dashboard</h1>
+                <h1>Bine ai venit!</h1>
             </div>
         </>
     );
